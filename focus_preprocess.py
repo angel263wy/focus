@@ -30,7 +30,7 @@ def get_mean_img(filelist, width, height):
 输入：img---np列表 宽×高个元素
 '''
 def disposal_smearing(img, width, height):
-    raw_data = np.reshape(img, (raw_height, raw_width))
+    raw_data = np.reshape(img, (height, width))
     
     # 取暗行数据 提取前10行暗行数据    
     dark_lines = raw_data[0:10, :]
@@ -57,41 +57,49 @@ def raw_file_output(fname, raw_data):
 需要修改的参数为宽、高、垫片厚度
 thinkness为垫片厚度 str类型 文件夹需要包含厚度
 '''
-if __name__ == "__main__":
-    raw_width = 512
-    raw_height = 380
-    thinkness = '2.85'
+def preprocess(thinkness, width, height):
+    raw_width = width  #512
+    raw_height = height  # 380
+    thinkness = thinkness # '2.87'
     # 本底图像获取
-    darkfile = glob.glob('*_'+ thinkness +'*/RAW*/DPC*_8.raw') 
-    img_dark = get_mean_img(darkfile, raw_width, raw_height)
+    darkfile = glob.glob('*_'+ thinkness +'*/RAW*/DPC*_8.raw')
+    if len(darkfile): 
+        img_dark = get_mean_img(darkfile, raw_width, raw_height)
+        
+        #490P2图像处理
+        band490 = glob.glob('*_'+ thinkness +'*/RAW*/DPC*_2.raw')
+        img490 = get_mean_img(band490, raw_width, raw_height)  # 求平均    
+        img490 = img490 - img_dark  # 扣本底    
+        img490 = disposal_smearing(img490, raw_width, raw_height)  # 帧转移校正
+        raw_file_output('490P2-'+thinkness+'.raw', img490)
+        
+        #565图像处理
+        band565 = glob.glob('*_'+ thinkness +'*/RAW*/DPC*_4.raw')
+        img565 = get_mean_img(band565, raw_width, raw_height)  # 求平均    
+        img565 = img565 - img_dark  # 扣本底    
+        img565 = disposal_smearing(img565, raw_width, raw_height)  # 帧转移校正
+        raw_file_output('565-'+thinkness+'.raw', img565)
+        
+        #670P2图像处理
+        band670 = glob.glob('*_'+ thinkness +'*/RAW*/DPC*_4.raw')
+        img670 = get_mean_img(band670, raw_width, raw_height)  # 求平均    
+        img670 = img670 - img_dark  # 扣本底    
+        img670 = disposal_smearing(img670, raw_width, raw_height)  # 帧转移校正
+        raw_file_output('670P2-'+thinkness+'.raw', img670)
+        
+        #443图像处理
+        band443 = glob.glob('*_'+ thinkness +'*/RAW*/DPC*_4.raw')
+        img443 = get_mean_img(band443, raw_width, raw_height)  # 求平均    
+        img443 = img443 - img_dark  # 扣本底    
+        img443 = disposal_smearing(img443, raw_width, raw_height)  # 帧转移校正
+        raw_file_output('443-'+thinkness+'.raw', img443)
+                
+        print('end')
+    else:
+        print('未找到文件')
+
+if __name__ == "__main__":
+    tk = ['2.85', '2.87']
+    for i in tk:
+        preprocess(i, 512, 380)
     
-    #490P2图像处理
-    band490 = glob.glob('*_'+ thinkness +'*/RAW*/DPC*_2.raw')
-    img490 = get_mean_img(band490, raw_width, raw_height)  # 求平均    
-    img490 = img490 - img_dark  # 扣本底    
-    img490 = disposal_smearing(img490, raw_width, raw_height)  # 帧转移校正
-    raw_file_output('490P2-'+thinkness+'.raw', img490)
-    
-    #565图像处理
-    band565 = glob.glob('*_'+ thinkness +'*/RAW*/DPC*_4.raw')
-    img565 = get_mean_img(band565, raw_width, raw_height)  # 求平均    
-    img565 = img565 - img_dark  # 扣本底    
-    img565 = disposal_smearing(img565, raw_width, raw_height)  # 帧转移校正
-    raw_file_output('565-'+thinkness+'.raw', img565)
-    
-    #670P2图像处理
-    band670 = glob.glob('*_'+ thinkness +'*/RAW*/DPC*_4.raw')
-    img670 = get_mean_img(band670, raw_width, raw_height)  # 求平均    
-    img670 = img670 - img_dark  # 扣本底    
-    img670 = disposal_smearing(img670, raw_width, raw_height)  # 帧转移校正
-    raw_file_output('670P2-'+thinkness+'.raw', img670)
-    
-    #443图像处理
-    band443 = glob.glob('*_'+ thinkness +'*/RAW*/DPC*_4.raw')
-    img443 = get_mean_img(band443, raw_width, raw_height)  # 求平均    
-    img443 = img443 - img_dark  # 扣本底    
-    img443 = disposal_smearing(img443, raw_width, raw_height)  # 帧转移校正
-    raw_file_output('443-'+thinkness+'.raw', img443)
-    
-    
-    print('end')
