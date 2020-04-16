@@ -6,18 +6,9 @@ import glob
 用brenner梯度函数 求相邻两个像元灰度之差
 
 对于0度视场 取窗口（136,223）--（164,282）  （X,Y）表示（行，列）
+对于30度视场 取窗口（265,238）--（290,287）  （X,Y）表示（行，列） 注意 与S3定义不一致
 '''
-
-def cal_brenner(fname, width, height, x1, y1, x2, y2):
-    raw_width = width  #512
-    raw_height = height  #380
-    filename = fname
-    # 设置区域
-    startX = x1  #136
-    startY = y1  # 223
-    endX = x2  # 164
-    endY = y2  # 282
-
+def cal_brenner(filename, raw_width, raw_height, startX, startY, endX, endY):
     img = np.fromfile(filename, dtype=np.uint16)
     img = np.reshape(img, (raw_height, raw_width))
     img_window = img[startX:endX+1, startY:endY+1]
@@ -41,7 +32,13 @@ if __name__ == "__main__":
     filelist = glob.glob('*.raw')
     if len(filelist):
         for fname in filelist:
-            foo = cal_brenner(fname, height=380, width=512 ,x1=136, y1=223, x2=164, y2=282)
+            # 中心视场
+            foo = cal_brenner(fname, raw_height=380, raw_width=512 ,
+                                startX=136, startY=223, endX=164, endY=282)
+            # 30度视场
+            # foo = cal_brenner(fname, raw_height=380, raw_width=512 ,
+            #                     startX=265, startY=238, endX=290, endY=287)
+            print('现在处理文件', fname)
             with open('brenner.csv', 'a+') as f:
                 f.write(fname + ',' + str(foo) + '\n')
     else:

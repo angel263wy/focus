@@ -55,51 +55,58 @@ def raw_file_output(fname, raw_data):
 '''
 主函数 
 需要修改的参数为宽、高、垫片厚度
-thinkness为垫片厚度 str类型 文件夹需要包含厚度
+dirs为存放图像的目录 用图像接收软件的格式 目录中内含RAW_ImageData目录中保存文件
+thickness为垫片厚度尺寸 str类型 用于输出文件标识
 '''
-def preprocess(thinkness, width, height):
-    raw_width = width  #512
-    raw_height = height  # 380
-    thinkness = thinkness # '2.87'
+def preprocess(img_dirs, thickness, raw_width, raw_height):   
     # 本底图像获取
-    darkfile = glob.glob('*_'+ thinkness +'*/RAW*/DPC*_8.raw')
+    darkfile = glob.glob(img_dirs +'*/RAW*/DPC*_8.raw')
     if len(darkfile): 
         img_dark = get_mean_img(darkfile, raw_width, raw_height)
         
         #490P2图像处理
-        band490 = glob.glob('*_'+ thinkness +'*/RAW*/DPC*_2.raw')
+        band490 = glob.glob(img_dirs +'*/RAW*/DPC*_2.raw')
         img490 = get_mean_img(band490, raw_width, raw_height)  # 求平均    
         img490 = img490 - img_dark  # 扣本底    
         img490 = disposal_smearing(img490, raw_width, raw_height)  # 帧转移校正
-        raw_file_output('490P2-'+thinkness+'.raw', img490)
+        raw_file_output('490P2-'+thickness+'.raw', img490)
         
         #565图像处理
-        band565 = glob.glob('*_'+ thinkness +'*/RAW*/DPC*_4.raw')
+        band565 = glob.glob(img_dirs +'*/RAW*/DPC*_4.raw')
         img565 = get_mean_img(band565, raw_width, raw_height)  # 求平均    
         img565 = img565 - img_dark  # 扣本底    
         img565 = disposal_smearing(img565, raw_width, raw_height)  # 帧转移校正
-        raw_file_output('565-'+thinkness+'.raw', img565)
+        raw_file_output('565-'+thickness+'.raw', img565)
         
         #670P2图像处理
-        band670 = glob.glob('*_'+ thinkness +'*/RAW*/DPC*_4.raw')
+        band670 = glob.glob(img_dirs +'*/RAW*/DPC*_6.raw')
         img670 = get_mean_img(band670, raw_width, raw_height)  # 求平均    
         img670 = img670 - img_dark  # 扣本底    
         img670 = disposal_smearing(img670, raw_width, raw_height)  # 帧转移校正
-        raw_file_output('670P2-'+thinkness+'.raw', img670)
+        raw_file_output('670P2-'+thickness+'.raw', img670)
         
         #443图像处理
-        band443 = glob.glob('*_'+ thinkness +'*/RAW*/DPC*_4.raw')
+        band443 = glob.glob(img_dirs +'*/RAW*/DPC*_14.raw')
         img443 = get_mean_img(band443, raw_width, raw_height)  # 求平均    
         img443 = img443 - img_dark  # 扣本底    
         img443 = disposal_smearing(img443, raw_width, raw_height)  # 帧转移校正
-        raw_file_output('443-'+thinkness+'.raw', img443)
+        raw_file_output('443-'+thickness+'.raw', img443)
                 
         print('end')
     else:
         print('未找到文件')
 
 if __name__ == "__main__":
-    tk = ['2.85', '2.87']
-    for i in tk:
-        preprocess(i, 512, 380)
+    # 30度视场
+    # tk = glob.glob('*mm-20ms-*')
+    # 中心视场
+    tk = glob.glob('*mm-20ms')
+    
+    if len(tk):
+        for i in tk:
+            thick = i[-16: -1]
+            preprocess(i, thick, 512, 380)
+            print('现在处理目录', i)
+    else:
+        print('文件未找到')
     
