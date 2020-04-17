@@ -28,16 +28,25 @@ def cal_brenner(filename, raw_width, raw_height, startX, startY, endX, endY):
     print('res=',res)
     return res
 
-if __name__ == "__main__":    
+if __name__ == "__main__": 
+    # 中心视场
+    # x1=136
+    # y1=223
+    # x2=164
+    # y2=282
+    # 30度视场
+    x1=265
+    y1=238
+    x2=290
+    y2=287
+    
+    
     filelist = glob.glob('*.raw')
     if len(filelist):
         for fname in filelist:
-            # 中心视场
+            
             foo = cal_brenner(fname, raw_height=380, raw_width=512 ,
-                                startX=136, startY=223, endX=164, endY=282)
-            # 30度视场
-            # foo = cal_brenner(fname, raw_height=380, raw_width=512 ,
-            #                     startX=265, startY=238, endX=290, endY=287)
+                                startX=x1, startY=y1, endX=x2, endY=y2)
             print('现在处理文件', fname)
             with open('brenner.csv', 'a+') as f:
                 f.write(fname + ',' + str(foo) + '\n')
